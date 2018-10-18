@@ -4,6 +4,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from redis import StrictRedis
+from flask_migrate import Migrate, MigrateCommand
 
 
 class Config:
@@ -44,6 +45,10 @@ CSRFProtect(app)
 # 设置session保存指定位置
 Session(app)
 manager = Manager(app)
+# 将app与db关联
+Migrate(app, db)
+# 将迁移命令添加到manager中
+manager.add_command(MigrateCommand)
 
 
 @app.route('/')
