@@ -1,5 +1,3 @@
-import logging
-
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from info import create_app, db
@@ -11,16 +9,6 @@ manager = Manager(app)
 Migrate(app, db)
 # 将迁移命令添加到manager中
 manager.add_command(MigrateCommand)
-
-
-@app.route('/')
-def index():
-    logging.debug('denug')
-    logging.warning('warning')
-    logging.error('error')
-    logging.fatal('fatal')
-
-    return 'index'
 
 
 if __name__ == '__main__':
