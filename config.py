@@ -19,16 +19,16 @@ class Config:
     REDIS_HOST = '127.0.0.1'
     REDIS_PORT = 6379
 
-    # Session保存配置
+    # session保存配置
     SESSION_TYPE = 'redis'
     # 开启session签名
     SESSION_USE_SIGNER = True
-    # 制定Session保存的redis
+    # 指定session保存到redis
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
-    # 设置需要过期
+    # 设置session需要过期
     SESSION_PERMANENT = False
-    # 设置过期时间
-    PERMANENT_SESSION_LIFETIME = 86400 *2
+    # 设置session过期时间
+    PERMANENT_SESSION_LIFETIME = 86400 *2  # 时间为2天, 单位秒
 
     # 设置日志等级
     LOG_LEVEL = logging.DEBUG
