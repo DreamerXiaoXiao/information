@@ -25,7 +25,7 @@ def get_image_code():
     redis_store.setex("image_code" + image_code_id, 300, text)
 
     response = make_response(image)
-    response.headers['Content-Type'] = 'images/jpg'
+    response.headers['Content-Type'] = 'image/jpg'
     return response
 
 
