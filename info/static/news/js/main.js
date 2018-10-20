@@ -148,10 +148,23 @@ $(function(){
     })
 })
 
+
+// 验证码的使用地方
+// 1.页面第一次加载时
+// 2.点击验证码时
 var imageCodeId = ""
+
+generateImageCode();
 
 // TODO 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
 function generateImageCode() {
+    // 1.生成uuid
+    imageCodeId = generateUUID();
+    // 2.设置url
+    var url = '/passport/image_code?imageCodeId='+imageCodeId;
+    // 3.设置image的src属性
+    $('.get_pic_code').attr('src', url);
+
 
 }
 

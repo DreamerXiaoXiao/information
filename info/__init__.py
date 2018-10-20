@@ -64,5 +64,9 @@ def create_app(config_name):
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
+    # 注册登录与注册蓝图
+    from info.modules.passport import passport_blu
+    app.register_blueprint(passport_blu)
+
     # 返回app对象
     return app
