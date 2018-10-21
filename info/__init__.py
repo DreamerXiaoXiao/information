@@ -18,55 +18,59 @@ redis_store = None  # type: StrictRedis
 def setup_log(config_name):
     """设置日志信息"""
 
-    # 设置日志的记录等级
+    # 1.设置日志的记录等级
     logging.basicConfig(level=config[config_name].LOG_LEVEL)  # 调试debug级
 
-    # 创建日志记录器，指明日志保存的路径、每个日志文件的最大大小、保存的日志文件个数上限
+    # 2.创建日志记录器，指明日志保存的路径、每个日志文件的最大大小、保存的日志文件个数上限
     file_log_handler = RotatingFileHandler("logs/log", maxBytes=1024 * 1024 * 100, backupCount=10)
 
-    # 创建日志记录的格式 日志等级 输入日志信息的文件名 行数 日志信息
+    # 3.创建日志记录的格式 日志等级 输入日志信息的文件名 行数 日志信息
     formatter = logging.Formatter('%(levelname)s %(filename)s:%(lineno)d %(message)s')
 
-    # 为刚创建的日志记录器设置日志记录格式
+    # 4.为刚创建的日志记录器设置日志记录格式
     file_log_handler.setFormatter(formatter)
 
-    # 为全局的日志工具对象（flask app使用的）添加日志记录器
+    # 5.为全局的日志工具对象（flask app使用的）添加日志记录器
     logging.getLogger().addHandler(file_log_handler)
 
 
 def create_app(config_name):
-    """创建app"""
+    """返回app"""
 
-    # 设置日志
+    # 1.设置日志
     setup_log(config_name)
-    # 创建APP应用
+    # 2.创建app
     app = Flask(__name__)
-    # 加载配置
-    app.config.from_object(config[config_name])
+    # 3.加载配置
+    config_object = config[config_name]
+    app.config.from_object(config_object)
 
-    # 加载各种扩展
-    # 1.初始化数据库
+    # 4.加载各种扩展
+    # 4.1初始化数据库
     db.init_app(app)
 
-    # 2.开启CSRF项目保护,只做服务器的验证
-    CSRFProtect(app)
+    # 4.2开启CSRF项目保护,只做服务器的验证
+    # CSRFProtect(app)
 
-    # 3.设置session保存到指定位置
+    # 4.3设置session保存到指定位置
     Session(app)
 
-    # 初始化全局变量
-    # 初始化redis存储对象
+    # 5初始化全局变量
+    # 5.1初始化redis存储对象
     global redis_store
-    redis_store = StrictRedis(host=config[config_name].REDIS_HOST,
-                              port=config[config_name].REDIS_PORT)
+    redis_store = StrictRedis(host=config_object.REDIS_HOST,
+                              port=config_object.REDIS_PORT,
+                              decode_responses=True)
 
-    # 注册主页蓝图
+    # 6.注册蓝图
+    # 6.1主页蓝图
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
-    # 注册登录与注册蓝图
+    # 6.2登录与注册蓝图
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
 
-    # 返回app对象
+    # 7.返回app对象
     return app
+

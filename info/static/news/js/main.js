@@ -33,9 +33,17 @@ $(function(){
 
 
 	// 点击输入框，提示文字上移
-	$('.form_group').on('click focusin',function(){
-		$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
-	})
+	// $('.form_group').on('click focusin',function(){
+	// 	$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
+	// })
+    $('.form_group').on('click',function(){
+        $(this).children('input').focus()
+    })
+
+    $('.form_group input').on('focusin',function(){
+        $(this).siblings('.input_tip').animate({'top':-5,'font-size':12},'fast')
+        $(this).parent().addClass('hotline');
+    })
 
 	// 输入框失去焦点，如果输入框为空，则提示文字下移
 	$('.form_group input').on('blur focusout',function(){
@@ -93,7 +101,7 @@ $(function(){
 		$(this).find('a')[0].click()
 	})
 
-    // TODO 登录表单提交
+    // 登录表单提交
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
@@ -110,10 +118,25 @@ $(function(){
         }
 
         // 发起登录请求
+        var params={
+           'mobile': mobile,
+           'password': password
+        }
+        $.ajax({
+            url:'/passport/login',
+            type:'post',
+            data: JSON.stringify(params),
+            contentType: 'application/json',
+            success:function (response) {
+                if(response.errno == '0'){
+                    location.reload()
+                }
+            }
+        });
     })
 
 
-    // TODO 注册按钮点击
+    //注册按钮点击
     $(".register_form_con").submit(function (e) {
         // 阻止默认提交操作
         e.preventDefault()
@@ -144,9 +167,35 @@ $(function(){
         }
 
         // 发起注册请求
-
+        var params={
+            'mobile': mobile,
+            'sms_code': smscode,
+            'password': password
+        }
+        $.ajax({
+            url:'/passport/register',
+            type:'post',
+            data: JSON.stringify(params),
+            contentType: 'application/json',
+            success:function (response) {
+                if (response.errno == '0'){
+                    //注册成功
+                    location.reload();
+                }else{
+                    //注册失败
+                    $("#register-password-err").html(response.errmsg);
+                    $("#register-password-err").show();
+                }
+            }
+        });
     })
 })
+//用户退出功能
+function logout() {
+    $.get('/passport/logout', function (response) {
+        location.reload()
+    })
+}
 
 
 // 验证码的使用地方
@@ -156,7 +205,7 @@ var imageCodeId = ""
 
 generateImageCode();
 
-// TODO 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
+//生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
 function generateImageCode() {
     // 1.生成uuid
     imageCodeId = generateUUID();
@@ -187,7 +236,42 @@ function sendSMSCode() {
         return;
     }
 
+    var params = {
+        'mobile': mobile,
+        'image_code': imageCode,
+        'image_code_id': imageCodeId
+    };
+
     // TODO 发送短信验证码
+    $.ajax({
+        url:'/passport/sms_code',
+        type:'post',
+        data: JSON.stringify(params),
+        contentType: 'application/json',
+        success:function (response) {
+            if(response.errno == '0'){
+                $("#register-password-err").html(response.errmsg);
+                $("#register-password-err").show();
+                //发送成功
+                var num = 60;
+                var t = setInterval(function () {
+                    if (num == 1){
+                        clearInterval(t)
+                        $('.get_code').html('点击发送验证码')
+                        $(".get_code").attr("onclick", "sendSMSCode();");
+                    }else{
+                         num-=1;
+                        $('.get_code').html(num + '秒')
+                    }
+                }, 1000);
+            }else{
+                //发送失败
+                $(".get_code").attr("onclick", "sendSMSCode();");
+                $("#register-password-err").html(response.errmsg);
+                $("#register-password-err").show();
+            }
+        }
+    });
 }
 
 // 调用该函数模拟点击左侧按钮

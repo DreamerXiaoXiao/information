@@ -58,6 +58,20 @@ class User(BaseModel, db.Model):
     # 当前用户所发布的新闻
     news_list = db.relationship('News', backref='user', lazy='dynamic')
 
+    # 定义password属性
+    @property
+    def password(self):
+        raise AttributeError('当前不允许读取')
+
+    @password.setter
+    def password(self, value):
+        """对用户密码加密"""
+        self.password_hash = generate_password_hash(value)
+
+    def check_password(self, value):
+        """校验密码"""
+        return check_password_hash(self.password_hash, value)
+
     def to_dict(self):
         resp_dict = {
             "id": self.id,
