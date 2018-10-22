@@ -1,5 +1,6 @@
 import random
 import re
+from datetime import datetime
 
 from flask import request, abort, make_response, current_app, jsonify, session
 
@@ -57,7 +58,7 @@ def login():
 
     # 4.校验用户
     if not user:
-        return jsonify(errno=RET.DATAERR, errmsg='用户不存在')
+        return jsonify(errno=RET.NODATA, errmsg='用户不存在')
 
     # 5.校验密码
     if not user.check_password(password):
@@ -68,7 +69,17 @@ def login():
     session['mobile'] = user.mobile
     session['nick_name'] = user.nick_name
 
-    # 7.返回数据
+    # 7.更新用户的最后一次登录时间
+    user.last_login = datetime.now()
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR, errmsg='数据更新失败')
+
+    # 8.返回数据
     return jsonify(errno=RET.OK, errmsg='登录成功')
 
 
@@ -113,6 +124,8 @@ def register():
     user = User()
     user.mobile = mobile
     user.nick_name = mobile
+    # 5.1记录用户的最后一次登录时间
+    user.last_login = datetime.now()
     user.password = password
 
     # 6.向数据库添加信息

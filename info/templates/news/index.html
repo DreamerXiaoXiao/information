@@ -13,14 +13,11 @@
     <div class="header_con">
         <div class="header">
             <a href="#" class="logo fl"><img src="../../static/news/images/logo.png" alt="logo"></a>
-            <ul class="menu fl">
-                <li class="active" data-cid="0"><a href="javascript:;">最新</a></li>
-                <li data-cid="1"><a href="javascript:;">股市</a></li>
-                <li data-cid="2"><a href="javascript:;">债市</a></li>
-                <li data-cid="3"><a href="javascript:;">商品</a></li>
-                <li data-cid="4"><a href="javascript:;">外汇</a></li>
-                <li data-cid="5"><a href="javascript:;">公司</a></li>
-            </ul>
+
+            <form action="#" class="form01 fl">
+                <input type="text" class="input_txt" name="wd">
+                <input type="submit" value="搜索" class="input_sub12">
+            </form>
             {% if not data.user %}
                 <div class="user_btns fr">
                     <a href="javascript:;" class="login_btn">登录</a> / <a href="javascript:;" class="register_btn">注册</a>
@@ -38,6 +35,14 @@
     </div>
     
     <div class="conter_con">
+        <ul class="menu fl">
+            <li class="active" data-cid="0"><a href="javascript:;">最新</a></li>
+            <li data-cid="1"><a href="javascript:;">股市</a></li>
+            <li data-cid="2"><a href="javascript:;">债市</a></li>
+            <li data-cid="3"><a href="javascript:;">商品</a></li>
+            <li data-cid="4"><a href="javascript:;">外汇</a></li>
+            <li data-cid="5"><a href="javascript:;">公司</a></li>
+        </ul>
         <ul class="list_con fl">
             <li>
                 <a href="#" class="news_pic fl"><img src="../../static/news/images/news_pic.jpg"></a>
@@ -86,7 +91,7 @@
                 </div>
             </li>
         </ul>
-        <div class="rank_con fr">
+        <div class="rank_con fl">
             <div class="rank_title">
                 <h3>点击排行</h3>
             </div>

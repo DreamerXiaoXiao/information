@@ -1,4 +1,17 @@
 $(function(){
+    //设置搜索框
+    $('.input_txt').focus(function () {
+        $('.input_txt').css('border', '1px solid #F79564')
+        $('.input_sub12').css('background', '#F79564')
+
+    });
+
+    $('.input_txt').blur(function () {
+        $('.input_txt').css('border', '1px solid gray')
+        $('.input_sub12').css('background', 'gray')
+
+    });
+
 
 	// 打开登录框
 	$('.login_btn').click(function(){
@@ -108,11 +121,13 @@ $(function(){
         var password = $(".login_form #password").val()
 
         if (!mobile) {
+            $("#login-mobile-err").html('手机号不能为空');
             $("#login-mobile-err").show();
             return;
         }
 
         if (!password) {
+            $("#login-password-err").html('密码不能为空');
             $("#login-password-err").show();
             return;
         }
@@ -130,6 +145,9 @@ $(function(){
             success:function (response) {
                 if(response.errno == '0'){
                     location.reload()
+                }else{
+                    $("#login-password-err").html(response.errmsg);
+                    $("#login-password-err").show();
                 }
             }
         });
@@ -269,6 +287,7 @@ function sendSMSCode() {
                 $(".get_code").attr("onclick", "sendSMSCode();");
                 $("#register-password-err").html(response.errmsg);
                 $("#register-password-err").show();
+                generateImageCode()
             }
         }
     });
