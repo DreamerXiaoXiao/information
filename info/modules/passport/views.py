@@ -71,13 +71,6 @@ def login():
 
     # 7.更新用户的最后一次登录时间
     user.last_login = datetime.now()
-    try:
-        db.session.add(user)
-        db.session.commit()
-    except Exception as e:
-        current_app.logger.error(e)
-        db.session.rollback()
-        return jsonify(errno=RET.DBERR, errmsg='数据更新失败')
 
     # 8.返回数据
     return jsonify(errno=RET.OK, errmsg='登录成功')
