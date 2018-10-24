@@ -1,5 +1,10 @@
-import hashlib
+def test(args):
+    print(args)
+    print(*args)
 
-m2 = hashlib.md5()
-m2.update('hello'.encode('utf-8'))
-print(m2.hexdigest())
+
+def test2(*args):
+    print(args)
+
+
+test([1,2,3])

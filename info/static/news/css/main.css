@@ -1,5 +1,5 @@
 body {
-    background: #f1f2f6;
+    /*background: #f1f2f6;*/
     font-family: 'Microsoft YaHei';
 }
 
@@ -10,6 +10,7 @@ body {
     border-bottom: 1px solid #ccc;
     position: fixed;
     top: 0px;
+    z-index:999
 }
 
 .header {
@@ -591,6 +592,7 @@ body {
     left: 5px;
     top: 5px;
     content: "『";
+    z-index: 1;
 }
 
 .detail_con .summary:after {

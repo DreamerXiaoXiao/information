@@ -11,6 +11,8 @@ from config import config
 
 
 # 初始化扩展对象，然后再去调用 init_app 方法去初始化
+from info.utils.common import do_index_class, do_index_active
+
 db = SQLAlchemy()
 redis_store = None  # type: StrictRedis
 
@@ -62,14 +64,23 @@ def create_app(config_name):
                               port=config_object.REDIS_PORT,
                               decode_responses=True)
 
+    # 注册过滤器
+    # 主页排行过滤器
+    app.add_template_filter(do_index_class, 'index_class')
+    app.add_template_filter(do_index_active, 'index_active')
+
     # 6.注册蓝图
     # 6.1主页蓝图
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
-    # 6.2登录与注册蓝图
+    # 6.2 登录与注册蓝图
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+
+    # 6.3 新闻蓝图
+    from info.modules.news import news_blu
+    app.register_blueprint(news_blu)
 
     # 7.返回app对象
     return app
