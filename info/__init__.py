@@ -5,13 +5,13 @@ from flask import Flask
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
 from redis import StrictRedis
 
 from config import config
 
 
 # 初始化扩展对象，然后再去调用 init_app 方法去初始化
-from info.utils.common import do_index_class, do_index_active
 
 db = SQLAlchemy()
 redis_store = None  # type: StrictRedis
@@ -52,7 +52,13 @@ def create_app(config_name):
     db.init_app(app)
 
     # 4.2开启CSRF项目保护,只做服务器的验证
-    # CSRFProtect(app)
+    CSRFProtect(app)
+
+    @app.after_request
+    def after_request(response):
+        csrf_token = generate_csrf()
+        response.set_cookie('csrf_token', csrf_token)
+        return response
 
     # 4.3设置session保存到指定位置
     Session(app)
@@ -66,6 +72,7 @@ def create_app(config_name):
 
     # 注册过滤器
     # 主页排行过滤器
+    from info.utils.common import do_index_class, do_index_active
     app.add_template_filter(do_index_class, 'index_class')
     app.add_template_filter(do_index_active, 'index_active')
 
@@ -81,6 +88,10 @@ def create_app(config_name):
     # 6.3 新闻蓝图
     from info.modules.news import news_blu
     app.register_blueprint(news_blu)
+
+    # 6.3 用户信息管理蓝图
+    from info.modules.profile import profile_blu
+    app.register_blueprint(profile_blu)
 
     # 7.返回app对象
     return app

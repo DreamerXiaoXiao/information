@@ -26,7 +26,7 @@ class Config:
     SESSION_USE_SIGNER = True
     # 指定session保存到redis
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
-    # 设置session需要过期
+    # 设置session需要过期0
     SESSION_PERMANENT = False
     # 设置session过期时间
     PERMANENT_SESSION_LIFETIME = 86400 *2  # 时间为2天, 单位秒

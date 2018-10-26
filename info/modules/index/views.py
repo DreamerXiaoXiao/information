@@ -1,7 +1,9 @@
-from flask import render_template, current_app, session, jsonify, request
+from flask import render_template, current_app, session, jsonify, request, g
+from sqlalchemy import and_
 
 from info import constants
 from info.models import User, News, Category
+from info.utils.common import user_login_data, news_order_data
 from info.utils.response_code import RET
 from . import index_blu
 
@@ -60,6 +62,8 @@ def news_list():
 
 
 @index_blu.route('/')
+@user_login_data
+@news_order_data
 def index():
     """
     主页面判断用户是否登录
@@ -69,30 +73,14 @@ def index():
     4.渲染模板
     :return:
     """
-    # 1.获取session信息
-    user_id = session.get('user_id')
+    # 1.查询用户信息
+    user = g.user
 
-    # 2.查询用户信息
-    user = None
-    if user_id:
-        try:
-            user = User.query.get(user_id)
-        except Exception as e:
-            current_app.logger.error(e)
+    # 2.查询新闻数据
+    news_dict_li = g.news_dict_li
 
-    # 3.查询新闻数据
-    news_list = []
-    try:
-        news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
-    except Exception as e:
-        current_app.logger.error(e)
-        return jsonify(errno=RET.DBERR, errmsg='新闻查询错误')
-
-    news_dict_li = []
-    for news in news_list:
-        news_dict_li.append(news.to_basic_dict())
-
-    # 4.查询新闻分类
+    # 3.查询新闻分类
+    categories = []
     try:
         categories = Category.query.all()
     except Exception as e:
@@ -103,14 +91,14 @@ def index():
     for category in categories:
         category_list.append(category.to_dict())
 
-    # 5.把以上数据封装为为字典返回
+    # 4.把以上数据封装为为字典返回
     data = {
         'user': user.to_dict() if user else None,
         'news_dict_li': news_dict_li,
         'category_list': category_list
     }
 
-    # 6.渲染模板
+    # 5.渲染模板
     return render_template('news/index.html', data=data)
 
 

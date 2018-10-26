@@ -29,7 +29,7 @@
             <div class="user_login fr">
                 <img src='{% if data.user.avatar_url %}data.user_info.avatar_url{% else %}../../static/news/images/person01.png{% endif %}'
                      class="lgin_pic">
-                <a href="#">{{ data.user.nick_name }}</a>
+                <a id="nick_name" href="{{ url_for('profile.user_info') }}">{{ data.user.nick_name }}</a>
                 <a href="#" href="javascript:;" onclick="logout()">退出</a>
             </div>
         {% endif %}
@@ -38,11 +38,11 @@
 
 <div class="conter_con">
 
-    <ul class="list_con fl">
-        {% block contentBlock %}
+    {% block contentBlock %}
 
-        {% endblock %}
-    </ul>
+    {% endblock %}
+
+    {% block rankBlock %}
     <div class="rank_con fr">
         {% block authorBlock %}
 
@@ -57,6 +57,8 @@
             {% endfor %}
         </ul>
     </div>
+    {% endblock %}
+
 </div>
 <div class="footer">
     <div class="footer_links">
