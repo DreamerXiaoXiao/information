@@ -117,7 +117,7 @@ class News(BaseModel, db.Model):
     def to_review_dict(self):
         resp_dict = {
             "id": self.id,
-            "title": self.tiCLICK_RANK_MAX_NEWStle,
+            "title": self.title,
             "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
             "status": self.status,
             "reason": self.reason if self.reason else ""

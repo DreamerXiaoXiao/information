@@ -1,18 +1,260 @@
-from flask import render_template, g, request, redirect, jsonify
+from flask import render_template, g, request, redirect, jsonify, current_app, url_for
 
+from info import constants, db
+from info.models import Category, News
+from info.utils import image_storage
 from info.utils.common import user_login_data
 from info.utils.response_code import RET
 from . import profile_blu
 
 
-@profile_blu.route('pic_info', methods=['GET', 'POST'])
+@profile_blu.route('/news_list')
+@user_login_data
+def user_news_list():
+    """
+        # 1.显示发布新闻
+        # 2.返回响应
+        :return:
+        """
+    user = g.user
+    if not user:
+        return redirect('/')
+
+    # 1.获取参数
+    page = request.args.get('page', 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    news_list = []
+    total_page = 1
+    current_page = 1
+    try:
+        paginate = News.query.filter(News.user_id == user.id).\
+            order_by(News.create_time.desc()).\
+            paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+        news_list = paginate.items
+        total_page = paginate.pages
+        current_page = paginate.page
+    except Exception as e:
+        current_app.logger.error(e)
+
+    news_dict_li = []
+    for news in news_list:
+        news_dict_li.append(news.to_review_dict())
+
+    data = {
+        'news_list': news_dict_li,
+        'total_page': total_page,
+        'current_page': current_page,
+    }
+
+    return render_template('news/user_news_list.html', data=data)
+
+
+@profile_blu.route('/news_release', methods=['POST', 'GET'])
+@user_login_data
+def news_release():
+    """
+    发布新闻
+    get
+    1.显示前段信息
+    :return:
+    """
+    if request.method == 'GET':
+        categories = []
+        try:
+            categories = Category.query.all()
+        except Exception as e:
+            current_app.logger.error(e)
+
+        category_dict_li = []
+        for category in categories:
+            category_dict_li.append(category.to_dict())
+
+        category_dict_li.pop(0)
+        data = {
+            'categories': category_dict_li
+        }
+        return render_template('news/user_news_release.html', data=data)
+
+    # 获取参数
+    title = request.form.get('title')
+    category_id = request.form.get('category_id')
+    digest = request.form.get('digest')
+    index_image = request.files.get('index_image')
+    content = request.form.get('content')
+
+    # 校验参数
+    if not all([title, category_id, digest, index_image, content]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    try:
+        category_id = int(category_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 上传新闻图片
+    try:
+        index_image_content = index_image.read()
+        key = image_storage.storage(index_image_content)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR, errmsg='新闻图片上传错误')
+
+    # 初始化新闻模型
+    news = News()
+    news.category_id = category_id
+    news.source = '个人发布'
+    news.content = content
+    news.user_id = g.user.id
+    news.digest = digest
+    news.index_image_url = constants.QINIU_DOMIN_PREFIX + key
+
+    # 标记当前新闻的状态
+    news.status = 1  # 审核状态
+    # 保存到数据库
+
+    try:
+        db.session.add(news)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='数据保存失败')
+
+    return redirect(url_for('profile.user_news_list'))
+
+
+@profile_blu.route('/collection')
+@user_login_data
+def user_collection():
+    """
+    # 1.查询用户收藏新闻
+    # 2.返回响应
+    :return:
+    """
+    user = g.user
+    if not user:
+        return redirect('/')
+
+    # 1.获取参数
+    page = request.args.get('page', 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    collections = []
+    total_page = 1
+    current_page = 1
+    try:
+        paginate = user.collection_news.paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+        collections = paginate.items
+        total_page = paginate.pages
+        current_page = paginate.page
+    except Exception as e:
+        current_app.logger.error(e)
+
+    collection_news_li = []
+    for news in collections:
+        collection_news_li.append(news.to_basic_dict())
+
+    data = {
+        'collections': collections,
+        'total_page': total_page,
+        'current_page': current_page
+    }
+
+    return render_template('news/user_collection.html', data=data)
+
+
+@profile_blu.route('/pass_info', methods=['GET', "POST"])
+@user_login_data
+def pass_info():
+    """
+    # 1.获取参数
+    # 2.校验参数
+    # 3.修改密码
+    # 4.返回响应
+    :return:
+    """
+    # 1.如果用户不存在,重定向到主页
+    user = g.user
+    if not user:
+        return redirect('/')
+
+    if request.method == "GET":
+        return render_template('news/user_pass_info.html')
+
+    # 2.获取参数
+    old_password = request.json.get('old_password')
+    new_password = request.json.get('new_password')
+    new_password2 = request.json.get('new_password2')
+
+    # 3.校验参数
+    if not all([old_password, new_password, new_password2]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    if new_password != new_password2:
+        return jsonify(errno=RET.PARAMERR, errmsg='两次密码不一致')
+
+    # 4.修改密码
+    if not user.check_password(old_password):
+        return jsonify(errno=RET.PARAMERR, errmsg='原密码错误')
+
+    user.password = new_password
+    # 5.返回响应
+    return jsonify(errno=RET.OK, errmsg='密码修改成功')
+
+
+@profile_blu.route('/pic_info', methods=['GET', 'POST'])
 @user_login_data
 def pic_info():
+    """
+    用户头像上传
+    # 1.如果用户不存在,重定向到主页
+    # 2.获取参数
+    # 3.校验参数
+    # 4.更新用户信息
+    :return:
+    """
+    # 1.如果用户不存在,重定向到主页
     user = g.user
     if not user:
         return redirect('/')
     if request.method == "GET":
-        return render_template('news/user_pic_info.html')
+        return render_template('news/user_pic_info.html', data={"user": user.to_dict() if user else None})
+
+    # 2.获取参数
+    try:
+        avatar = request.files.get('avatar').read()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 3.校验参数
+    if not avatar:
+        return jsonify(errno=RET.NODATA, errmsg='没有数据')
+
+    try:
+        key = image_storage.storage(avatar)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR, errmsg='图片上传失败')
+
+    # 4.添加用户头像信息
+    user.avatar_url = key
+    data = {
+        'avatar_url': constants.QINIU_DOMIN_PREFIX + key
+    }
+    return jsonify(errno=RET.OK, errmsg='OK', data=data)
 
 
 @profile_blu.route('/base_info', methods=["GET", "POST"])

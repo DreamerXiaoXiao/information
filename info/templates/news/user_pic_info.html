@@ -5,6 +5,8 @@
 	<title>用户中心</title>
 	<link rel="stylesheet" type="text/css" href="../../static/news/css/reset.css">
 	<link rel="stylesheet" type="text/css" href="../../static/news/css/main.css">
+    <script type="text/javascript" src="../../static/news/js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="../../static/news/js/jquery.form.min.js"></script>
     <script type="text/javascript" src="../../static/news/js/user_pic_info.js"></script>
 </head>
 <body class="inframe_body">
@@ -13,7 +15,7 @@
         <div class="form-group">
             <label class="label01">当前图像：</label>
 {#            <img src="../../static/news/images/user_pic.png" alt="用户图片" class="now_user_pic">#}
-            <img src="{% if data.user.avatar_url %}{{ data.user.avatar_url }}{% else %}../../static/news/images/user_pic.png{% endif %}" alt="用户图片" class="now_user_pic">
+            <img src="{% if data.avatar_url %}{{ data.avatar_url }}{% else %}../../static/news/images/user_pic.png{% endif %}" alt="用户图片" class="now_user_pic">
 
         </div>
         <div class="form-group">

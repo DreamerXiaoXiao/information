@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask
+from flask import Flask, render_template, g
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
@@ -60,7 +60,16 @@ def create_app(config_name):
         response.set_cookie('csrf_token', csrf_token)
         return response
 
-    # 4.3设置session保存到指定位置
+    # 4.3 统一对网站的404错误做处理
+    from info.utils.common import user_login_data
+
+    @app.errorhandler(404)
+    @user_login_data
+    def page_not_found(e):
+        user = g.user
+        return render_template('news/404.html', data={'user': user.to_dict() if user else None})
+
+    # 4.4设置session保存到指定位置
     Session(app)
 
     # 5初始化全局变量
@@ -92,6 +101,10 @@ def create_app(config_name):
     # 6.3 用户信息管理蓝图
     from info.modules.profile import profile_blu
     app.register_blueprint(profile_blu)
+
+    # 6.4 管理员信息管理蓝图
+    from info.modules.admin import admin_blu
+    app.register_blueprint(admin_blu)
 
     # 7.返回app对象
     return app

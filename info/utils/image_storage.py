@@ -1,8 +1,8 @@
 from qiniu import Auth, put_data
 
-access_key = "yV4GmNBLOgQK-1Sn3o4jktGLFdFSrlywR2C-hvsW"
-secret_key = "bixMURPL6tHjrb8QKVg2tm7n9k8C7vaOeQ4MEoeW"
-bucket_name = "ihome"
+access_key = "4HBIql9eAsPACfH6ziOyvFdnZZvGLs3PzF9ilJso"
+secret_key = "l7bo5yfJjZ2uE5dzBLNImce1kVeH1TlAJeS4ATOe"
+bucket_name = "dreamer"
 
 
 def storage(data):
@@ -20,6 +20,5 @@ def storage(data):
 
 
 if __name__ == '__main__':
-    file = input('请输入文件路径')
-    with open(file, 'rb') as f:
+    with open('1.jpg', 'rb') as f:
         storage(f.read())

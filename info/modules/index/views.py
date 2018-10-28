@@ -35,7 +35,7 @@ def news_list():
         return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
 
     # 3.查询新闻
-    filters = []
+    filters = [News.status == 0]
     if cid != 1:
         filters.append(News.category_id == cid)
     try:

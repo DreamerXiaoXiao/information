@@ -59,10 +59,9 @@ def news_order_data(f):
         # 查询新闻数据
         news_list = []
         try:
-            news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
+            news_list = News.query.filter(News.status == 0).order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
         except Exception as e:
             current_app.logger.error(e)
-            return jsonify(errno=RET.DBERR, errmsg='新闻查询错误')
 
         news_dict_li = []
         for news in news_list:
