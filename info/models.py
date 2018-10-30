@@ -120,7 +120,8 @@ class News(BaseModel, db.Model):
             "title": self.title,
             "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
             "status": self.status,
-            "reason": self.reason if self.reason else ""
+            "reason": self.reason if self.reason else "",
+            "author": self.user.to_dict() if self.user else None
         }
         return resp_dict
 

@@ -109,7 +109,7 @@ $(function () {
                     comment_html += '</div>'
                     comment_html += '<div class="comment_time fl">' + comment.create_time + '</div>'
 
-                    comment_html += '<a href="javascript:;" class="comment_up fr" data-commentid="' + comment.id + '" data-newsid="' + comment.news_id + '" data-likecount="'+ comment.like_count +'">赞</a>'
+                    comment_html += '<a href="javascript:;" class="comment_up fr" data-commentid="' + comment.id + '" data-newsid="' + comment.news_id + '" data-likecount="' + comment.like_count + '">赞</a>'
                     comment_html += '<a href="javascript:;" class="comment_reply fr">回复</a>'
                     comment_html += '<form class="reply_form fl" data-commentid="' + comment.id + '" data-newsid="' + news_id + '">'
                     comment_html += '<textarea class="reply_input"></textarea>'
@@ -177,7 +177,7 @@ $(function () {
                             like_count = parseInt(like_count) + 1
                             // 代表是点赞
                             $this.addClass('has_comment_up')
-                        }else {
+                        } else {
                             like_count = parseInt(like_count) - 1
                             $this.removeClass('has_comment_up')
                         }
@@ -185,7 +185,7 @@ $(function () {
                         $this.attr('data-likecount', like_count)
                         if (like_count == 0) {
                             $this.html("赞")
-                        }else {
+                        } else {
                             $this.html(like_count)
                         }
                     } else if (resp.errno == "4101") {
@@ -252,7 +252,7 @@ $(function () {
                         comment_html += '</div>'
                         comment_html += '<div class="comment_time fl">' + comment.create_time + '</div>'
 
-                        comment_html += '<a href="javascript:;" class="comment_up fr" data-commentid="' + comment.id + '" data-newsid="' + comment.news_id + '" data-likecount="'+ comment.like_count + '">赞</a>'
+                        comment_html += '<a href="javascript:;" class="comment_up fr" data-commentid="' + comment.id + '" data-newsid="' + comment.news_id + '" data-likecount="' + comment.like_count + '">赞</a>'
                         comment_html += '<a href="javascript:;" class="comment_reply fr">回复</a>'
                         comment_html += '<form class="reply_form fl" data-commentid="' + comment.id + '" data-newsid="' + news_id + '">'
                         comment_html += '<textarea class="reply_input"></textarea>'
@@ -279,12 +279,70 @@ $(function () {
 
     // 关注当前新闻作者
     $(".focus").click(function () {
-
+        var user_id = $(this).attr('data-userid')
+        var params = {
+            "action": "follow",
+            "user_id": user_id
+        }
+        $.ajax({
+            url: "/news/user_followed",
+            type: "post",
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            data: JSON.stringify(params),
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // 关注成功
+                    var count = parseInt($(".follows b").html());
+                    count++;
+                    $(".follows b").html(count + "")
+                    $(".focus").hide()
+                    $(".focused").show()
+                } else if (resp.errno == "4101") {
+                    // 未登录，弹出登录框
+                    $('.login_form_con').show();
+                } else {
+                    // 关注失败
+                    alert(resp.errmsg)
+                }
+            }
+        })
     })
 
     // 取消关注当前新闻作者
     $(".focused").click(function () {
-
+        var user_id = $(this).attr('data-userid')
+        var params = {
+            "action": "unfollow",
+            "user_id": user_id
+        }
+        $.ajax({
+            url: "/news/user_followed",
+            type: "post",
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            data: JSON.stringify(params),
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // 取消关注成功
+                    var count = parseInt($(".follows b").html());
+                    count--;
+                    $(".follows b").html(count + "")
+                    $(".focus").show()
+                    $(".focused").hide()
+                } else if (resp.errno == "4101") {
+                    // 未登录，弹出登录框
+                    $('.login_form_con').show();
+                } else {
+                    // 取消关注失败
+                    alert(resp.errmsg)
+                }
+            }
+        })
     })
 })
 

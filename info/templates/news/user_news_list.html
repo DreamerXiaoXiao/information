@@ -17,9 +17,9 @@
                 {% if news.status == 0 %}
                 <li><a href="/news/news_detail/{{ news.id }}" target="_blank">{{ news.title }}</a><em class="pass">已通过</em><span>{{ news.create_time }}</span></li>
                 {% elif news.status == 1 %}
-                <li><a href="#">{{ news.title }}</a><em class="pass">审核中</em><span>{{ news.create_time }}</span></li>
+                <li><a href="/news/news_detail/{{ news.id }}" target="_blank">{{ news.title }}</a><em class="pass">审核中</em><span>{{ news.create_time }}</span></li>
                 {% else %}
-                <li><a href="#">{{ news.title }}</a><em class="nopass">未通过</em><span>{{ news.create_time }}</span>
+                <li><a href="/news/news_detail/{{ news.id }}" target="_blank">{{ news.title }}</a><em class="nopass">未通过</em><span>{{ news.create_time }}</span>
                 <b>{{ news.reason }}</b>
                 </li>
                 {% endif %}

@@ -2,10 +2,52 @@
 from flask import render_template, current_app, jsonify, g, abort, request
 
 from info import db
-from info.models import News, Comment, CommentLike
+from info.models import News, Comment, CommentLike, User
 from info.utils.common import user_login_data, news_order_data
 from info.utils.response_code import RET
 from . import news_blu
+
+
+@news_blu.route('/user_followed', methods=["POST"])
+@user_login_data
+def user_followed():
+    """
+    取消/添加用户关注
+    :return:
+    """
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg='未查询到用户信息')
+
+    user_id = request.json.get('user_id')
+    action = request.json.get('action')
+    if not all([user_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+    if action not in ('follow', 'unfollow'):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    try:
+        followed_user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='数据查询错误')
+
+    if not followed_user:
+        return jsonify(errno=RET.NODATA, errmsg='未关注当前用户')
+
+    if action == 'follow':
+        # 关注当前用户
+        if followed_user not in user.followed:
+            user.followed.append(followed_user)
+        else:
+            return jsonify(errno=RET.DATAEXIST, errmsg='当前用户已关注')
+    else:
+        if followed_user in user.followed:
+            user.followed.remove(followed_user)
+        else:
+            return jsonify(errno=RET.NODATA, errmsg='当前用户未关注')
+
+    return jsonify(errno=RET.OK, errmsg='OK')
 
 
 @news_blu.route('/comment_like', methods=['post'])
@@ -218,9 +260,8 @@ def news_detail(news_id):
 
     # 4.用户收藏逻辑
     is_collected = False
-    if user:
-        if news in user.collection_news:
-            is_collected = True
+    if user and news in user.collection_news:
+        is_collected = True
 
     # 5.查询当前新闻的全部评论
     comments = None
@@ -250,12 +291,18 @@ def news_detail(news_id):
             comment_dict['is_like'] = False
         comment_dict_li.append(comment_dict)
 
+    # 显示用户是否被关注
+    is_followed = False
+    if user and news.user in user.followed:
+        is_followed = True
+
     # 7.把以上数据封装为为字典返回
     data = {
         'user': user.to_dict() if user else None,
         'news_dict_li': news_dict_li,
         'news': news.to_dict(),
         'is_collected': is_collected,
+        'is_followed': is_followed,
         'comments': comment_dict_li
     }
 

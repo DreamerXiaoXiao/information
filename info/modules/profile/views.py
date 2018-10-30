@@ -1,11 +1,135 @@
-from flask import render_template, g, request, redirect, jsonify, current_app, url_for
+from flask import render_template, g, request, redirect, jsonify, current_app, url_for, abort
 
 from info import constants, db
-from info.models import Category, News
+from info.models import Category, News, User
 from info.utils import image_storage
 from info.utils.common import user_login_data
 from info.utils.response_code import RET
 from . import profile_blu
+
+
+@profile_blu.route('/other_news_list')
+def other_news_list():
+    """
+    显示其他用户的新闻详情
+    :return:
+    """
+    other_id = request.args.get('user_id')
+    page = request.args.get('page', 1)
+    if not other_id:
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    try:
+        other = User.query.get(other_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='数据查询错误')
+
+    if not other:
+        return jsonify(errno=RET.NODATA, errmsg='未查询到数据')
+    try:
+        paginate = other.news_list.paginate(page, constants.OTHER_NEWS_PAGE_MAX_COUNT, False)
+        news_list = paginate.items
+        current_page = paginate.page
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='数据查询错误')
+
+    news_dict_li = []
+    for news_dict in news_list:
+        news_dict_li.append(news_dict.to_basic_dict())
+    data = {
+        'news_list': news_dict_li,
+        'current_page': current_page,
+        'total_page': total_page
+    }
+    return jsonify(errno=RET.OK, errmsg='OK', data=data)
+
+
+@profile_blu.route('/user_other')
+@user_login_data
+def user_other():
+    """
+    显示其他用户的详情
+    :return:
+    """
+    user = g.user
+    if not user:
+        abort(404)
+    user_id = request.args.get('user_id')
+    if not user_id:
+        abort(404)
+    other = None
+    try:
+        user_id = int(user_id)
+        other = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(404)
+    is_followed = False
+    # 判断当前登录用户是否关注过该用户
+    is_followed = False
+    if user and other.followers.filter(User.id == user.id).count() > 0:
+        is_followed = True
+
+    # 组织数据，并返回
+    data = {
+        'user': user.to_dict() if user else None,
+        "other": other.to_dict(),
+        "is_followed": is_followed
+    }
+    return render_template('news/other.html', data=data)
+
+
+@profile_blu.route('/user_follow')
+@user_login_data
+def user_follow():
+    """
+    用户关注
+    :return:
+    """
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg='用户没有登录')
+    page = request.args.get('page', 1)
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    users = []
+    total_page = 1
+    current_page = 1
+
+    try:
+        paginate = user.followed.paginate(page,constants.USER_FOLLOWED_MAX_COUNT, False)
+        users = paginate.items
+        current_page = paginate.page
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+
+    # 显示用户是否被关注
+
+    user_dict_li = []
+    for user_followed in users:
+        user_dict_li.append(user_followed.to_dict())
+
+    data = {
+        'user': user.to_dict() if user else None,
+        'users': user_dict_li,
+        'total_page': total_page,
+        'current_page': current_page
+    }
+    return render_template('news/user_follow.html', data=data)
 
 
 @profile_blu.route('/news_list')
@@ -108,6 +232,7 @@ def news_release():
 
     # 初始化新闻模型
     news = News()
+    news.title = title
     news.category_id = category_id
     news.source = '个人发布'
     news.content = content
@@ -127,7 +252,7 @@ def news_release():
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='数据保存失败')
 
-    return redirect(url_for('profile.user_news_list'))
+    return jsonify(errno=RET.OK, errmsg='新闻发布成功')
 
 
 @profile_blu.route('/collection')
@@ -302,5 +427,5 @@ def user_info():
     user = g.user
     if not user:
         return redirect('/')
-    return render_template('news/user.html', data={'user': user})
+    return render_template('news/user.html', data={'user': user.to_dict()})
 

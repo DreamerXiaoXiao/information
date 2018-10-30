@@ -1,7 +1,5 @@
 import logging
 
-from redis import StrictRedis
-
 
 class Config:
     """项目配置"""
@@ -25,6 +23,7 @@ class Config:
     # 开启session签名
     SESSION_USE_SIGNER = True
     # 指定session保存到redis
+    from redis import StrictRedis
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
     # 设置session需要过期0
     SESSION_PERMANENT = False

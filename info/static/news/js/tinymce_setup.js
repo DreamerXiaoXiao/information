@@ -2,7 +2,7 @@ tinymce.init({
     //选择class为content的标签作为编辑器
     selector: '#rich_content',
     //方向从左到右
-    directionality:'ltr',
+    directionality:'rtr',
     //语言选择中文
     language:'zh_CN',
     //高度为400

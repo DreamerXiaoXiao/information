@@ -2,25 +2,20 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, render_template, g
-from flask_session import Session
-from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import CSRFProtect
-from flask_wtf.csrf import generate_csrf
-from redis import StrictRedis
-
-from config import config
-
 
 # 初始化扩展对象，然后再去调用 init_app 方法去初始化
-
+from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
-redis_store = None  # type: StrictRedis
+
+redis_store = None
+from config import config
 
 
 def setup_log(config_name):
     """设置日志信息"""
 
     # 1.设置日志的记录等级
+
     logging.basicConfig(level=config[config_name].LOG_LEVEL)  # 调试debug级
 
     # 2.创建日志记录器，指明日志保存的路径、每个日志文件的最大大小、保存的日志文件个数上限
@@ -52,10 +47,12 @@ def create_app(config_name):
     db.init_app(app)
 
     # 4.2开启CSRF项目保护,只做服务器的验证
+    from flask_wtf import CSRFProtect
     CSRFProtect(app)
 
     @app.after_request
     def after_request(response):
+        from flask_wtf.csrf import generate_csrf
         csrf_token = generate_csrf()
         response.set_cookie('csrf_token', csrf_token)
         return response
@@ -70,11 +67,13 @@ def create_app(config_name):
         return render_template('news/404.html', data={'user': user.to_dict() if user else None})
 
     # 4.4设置session保存到指定位置
+    from flask_session import Session
     Session(app)
 
     # 5初始化全局变量
     # 5.1初始化redis存储对象
     global redis_store
+    from redis import StrictRedis
     redis_store = StrictRedis(host=config_object.REDIS_HOST,
                               port=config_object.REDIS_PORT,
                               decode_responses=True)

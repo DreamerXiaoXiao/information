@@ -161,6 +161,9 @@ body{
 .show{
 	display:block;
 }
+.yel{
+	color: yellow;
+}
 
 .main_body{
 	position:fixed;

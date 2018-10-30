@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block titleBlock %}
-
     {% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="../../static/news/css/reset.css">
     <link rel="stylesheet" type="text/css" href="../../static/news/css/main.css">
+    {% block cssBlock %}
+    
+    {% endblock %}
     <script type="text/javascript" src="../../static/news/js/jquery-1.12.4.min.js"></script>
     <script type="text/javascript" src="../../static/news/js/main.js"></script>
     {% block scriptBlock %}
@@ -27,7 +29,7 @@
             </div>
         {% else %}
             <div class="user_login fr">
-                <img src='{% if data.user.avatar_url %}data.user_info.avatar_url{% else %}../../static/news/images/person01.png{% endif %}'
+                <img src='{% if data.user.avatar_url %}{{ data.user.avatar_url }}{% else %}../../static/news/images/person01.png{% endif %}'
                      class="lgin_pic">
                 <a id="nick_name" href="{{ url_for('profile.user_info') }}">{{ data.user.nick_name }}</a>
                 <a href="#" href="javascript:;" onclick="logout()">退出</a>
@@ -52,7 +54,7 @@
         </div>
         <ul class="rank_list">
             {% for news in data.news_dict_li %}
-                <li><span class="{{ loop.index | index_class }}">{{ loop.index }}</span><a href="#">{{ news.title }}</a>
+                <li><span class="{{ loop.index | index_class }}">{{ loop.index }}</span><a href="/news/news_detail/{{ news.id }}">{{ news.title }}</a>
                 </li>
             {% endfor %}
         </ul>

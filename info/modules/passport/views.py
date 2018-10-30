@@ -50,7 +50,6 @@ def login():
         return jsonify(errno=RET.PARAMERR, errmsg='手机号格式不正确')
 
     # 3. 查询用户
-    user = None
     try:
         user = User.query.filter(User.mobile == mobile).first()
     except Exception as e:

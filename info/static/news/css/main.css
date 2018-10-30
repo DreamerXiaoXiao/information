@@ -203,6 +203,7 @@ body {
 
 .card_list{
     width:300px;
+    height: 160px;
     margin:20px;
     float:left;
 }
@@ -568,7 +569,12 @@ body {
     text-indent: 20px;
     background: url(../images/clock.png) left center no-repeat;
 }
-
+.clicks{
+    color: #999;
+    font-size: 12px;
+    text-indent: 20px;
+    margin-right: 20px;
+}
 .comment {
     color: #999;
     font-size: 12px;
