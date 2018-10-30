@@ -1,0 +1,13 @@
+Generic single-database configuration.
+
+// 数据库迁移
+// 1.初始化迁移
+python py文件 db init
+// 2.创建迁移版本
+python py文件 db migrate -m '版本描述'
+// 3.执行迁移的版本
+python py文件 db upgrade
+// 4.降低迁移版本
+python py文件 db downgrade 版本号
+// 5.查看版本号
+python py文件 db history [版本号]
