@@ -417,7 +417,7 @@ def base_info():
     user.nick_name = nick_name
     user.signature = signature
     user.gender = gender
-    return jsonify(errno=RET.OK, errmsg='OK')
+    return jsonify(errno=RET.OK, errmsg='修改成功')
 
 
 @profile_blu.route('/user_info')

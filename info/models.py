@@ -19,6 +19,7 @@ tb_user_collection = db.Table(
     db.Column("create_time", db.DateTime, default=datetime.now)  # 收藏创建时间
 )
 
+# 用户关注与用户粉丝的自关联表
 tb_user_follows = db.Table(
     "info_user_fans",
     db.Column('follower_id', db.Integer, db.ForeignKey('info_user.id'), primary_key=True),  # 粉丝id

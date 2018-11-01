@@ -40,7 +40,7 @@ $(function () {
         var nowScroll = $(document).scrollTop();
 
         if ((canScrollHeight - nowScroll) < 100) {
-            // TODO 判断页数，去更新新闻数据
+            // 判断页数，去更新新闻数据
             if(!data_querying){
                 data_querying = true
                 if (cur_page < total_page){

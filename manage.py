@@ -17,7 +17,10 @@ manager.add_command('db', MigrateCommand)
 @manager.option('-u', '-username', dest="username")
 @manager.option('-p', '-password', dest="password")
 def createsuperuser(username, password):
-    """通过命令行执行函数,创建管理员用户"""
+    """
+    通过命令行执行函数,创建管理员用户
+    命令:python manage.py createsuperuser -u管理员名 -p密码
+    """
     if not all([username, password]):
         raise Exception('参数错误')
 

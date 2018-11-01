@@ -40,12 +40,12 @@ def news_list():
         filters.append(News.category_id == cid)
     try:
         paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page, False)
+        news_list_model = paginate.items
+        total_page = paginate.pages
+        current_page = paginate.page
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='新闻查询错误')
-    news_list_model = paginate.items
-    total_page = paginate.pages
-    current_page = paginate.page
 
     # 4.遍历数据
     news_dict_li = []
@@ -76,7 +76,7 @@ def index():
     # 1.查询用户信息
     user = g.user
 
-    # 2.查询新闻数据
+    # 2.查询新闻排行数据
     news_dict_li = g.news_dict_li
 
     # 3.查询新闻分类

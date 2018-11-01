@@ -12,7 +12,7 @@ def storage(data):
         ret, info = put_data(token, None, data)
         print(ret, info)
     except Exception as e:
-        raise e;
+        raise e
 
     if info.status_code != 200:
         raise Exception("上传图片失败")
@@ -20,5 +20,5 @@ def storage(data):
 
 
 if __name__ == '__main__':
-    with open('1.jpg', 'rb') as f:
+    with open('common.py', 'rb') as f:
         storage(f.read())
