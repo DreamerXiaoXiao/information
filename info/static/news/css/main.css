@@ -26,8 +26,12 @@ body {
 
 .logo {
     width: 140px;
-    height: 33px;
+    height: 40px;
     margin-top: 13px;
+}
+.logo_img{
+    width: 140px;
+    height: 40px;
 }
 
 .menu{

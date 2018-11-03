@@ -105,4 +105,4 @@ def index():
 @index_blu.route('/favicon.ico')
 def favicon():
     """返回页面图标"""
-    return current_app.send_static_file('news/favicon.ico')
+    return current_app.send_static_file('news/images/favicon.ico')
