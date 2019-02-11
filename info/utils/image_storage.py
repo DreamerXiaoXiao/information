@@ -2,7 +2,7 @@ from qiniu import Auth, put_data
 
 access_key = "4HBIql9eAsPACfH6ziOyvFdnZZvGLs3PzF9ilJso"
 secret_key = "l7bo5yfJjZ2uE5dzBLNImce1kVeH1TlAJeS4ATOe"
-bucket_name = "dreamer"
+bucket_name = "picture"
 
 
 def storage(data):

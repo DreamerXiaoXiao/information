@@ -358,6 +358,7 @@ def user_count():
     for i in range(0, 31):
         begin_date = today_date - timedelta(days=i)
         end_date = today_date + timedelta(days=1) - timedelta(days=i)
+        active_day = 0
         try:
             active_day = User.query.filter(User.is_admin == False,
                                           User.last_login > begin_date,
