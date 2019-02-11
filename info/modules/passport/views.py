@@ -113,6 +113,16 @@ def register():
     if real_sms_code != sms_code:
         return jsonify(errno=RET.DATAERR, errmsg='短信验证码错误')
 
+    try:
+        user = User.query.filter(User.mobile == mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户失败')
+
+    # 4.校验用户
+    if user:
+        return jsonify(errno=RET.DATAERR, errmsg='用户已注册')
+
     # 5.初始化User模型
     user = User()
     user.mobile = mobile
